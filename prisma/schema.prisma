@@ -28,6 +28,7 @@ model Package {
   paymentStatus      PaymentStatus @default(UNPAID) @map("payment_status")
   paidAt             DateTime?     @map("paid_at")
   createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
   sessions           Session[]
 
   @@map("packages")
@@ -42,6 +43,7 @@ model Session {
   hasWarmup     Boolean       @default(false) @map("has_warmup")
   workoutNotes  String?       @map("workout_notes")
   createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
   deliveredAt   DateTime?     @map("delivered_at")
   clientReadAt  DateTime?     @map("client_read_at")
   package       Package       @relation(fields: [packageId], references: [id])
@@ -60,8 +62,10 @@ model Exercise {
   sets       Int
   reps       String
   load       String
-  weightKg   Float?  @map("weight_kg")
-  session    Session @relation(fields: [sessionId], references: [id])
+  weightKg   Float?   @map("weight_kg")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  session    Session  @relation(fields: [sessionId], references: [id])
 
   @@map("exercises")
 }
@@ -73,6 +77,8 @@ model VideoSubmission {
   telegramFileId String   @map("telegram_file_id")
   ptFeedback     String?  @map("pt_feedback")
   submittedAt    DateTime @default(now()) @map("submitted_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
   session        Session  @relation(fields: [sessionId], references: [id])
 
   @@map("video_submissions")
