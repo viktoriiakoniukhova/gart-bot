@@ -1,0 +1,79 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SessionStatus {
+  SCHEDULED
+  WORKOUT_CREATED
+  DELIVERED
+  CONFIRMED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+}
+
+model Package {
+  id                 String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  totalSessions      Int           @map("total_sessions")
+  completedSessions  Int           @default(0) @map("completed_sessions")
+  startDate          DateTime      @map("start_date") @db.Date
+  paymentStatus      PaymentStatus @default(UNPAID) @map("payment_status")
+  paidAt             DateTime?     @map("paid_at")
+  createdAt          DateTime      @default(now()) @map("created_at")
+  sessions           Session[]
+
+  @@map("packages")
+}
+
+model Session {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  packageId     String        @map("package_id") @db.Uuid
+  sessionNumber Int           @map("session_number")
+  scheduledDate DateTime      @map("scheduled_date") @db.Date
+  status        SessionStatus @default(SCHEDULED)
+  hasWarmup     Boolean       @default(false) @map("has_warmup")
+  workoutNotes  String?       @map("workout_notes")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  deliveredAt   DateTime?     @map("delivered_at")
+  clientReadAt  DateTime?     @map("client_read_at")
+  package       Package       @relation(fields: [packageId], references: [id])
+  exercises     Exercise[]
+  videos        VideoSubmission[]
+
+  @@map("sessions")
+}
+
+model Exercise {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId  String  @map("session_id") @db.Uuid
+  orderIndex Int     @map("order_index")
+  section    String
+  name       String
+  sets       Int
+  reps       String
+  load       String
+  weightKg   Float?  @map("weight_kg")
+  session    Session @relation(fields: [sessionId], references: [id])
+
+  @@map("exercises")
+}
+
+model VideoSubmission {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId      String   @map("session_id") @db.Uuid
+  exerciseName   String?  @map("exercise_name")
+  telegramFileId String   @map("telegram_file_id")
+  ptFeedback     String?  @map("pt_feedback")
+  submittedAt    DateTime @default(now()) @map("submitted_at")
+  session        Session  @relation(fields: [sessionId], references: [id])
+
+  @@map("video_submissions")
+}

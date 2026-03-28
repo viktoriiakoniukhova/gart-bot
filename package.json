@@ -1,0 +1,24 @@
+{
+  "name": "gart-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/bot.ts",
+    "start": "bun src/bot.ts",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy && prisma generate"
+  },
+  "dependencies": {
+    "@grammyjs/conversations": "^1.2.0",
+    "@prisma/client": "^5.14.0",
+    "grammy": "^1.27.0",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/node-cron": "^3.0.11",
+    "prisma": "^5.14.0",
+    "typescript": "^5.4.5"
+  }
+}
