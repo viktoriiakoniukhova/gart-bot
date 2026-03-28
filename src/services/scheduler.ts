@@ -2,6 +2,7 @@ import cron from "node-cron";
 import type { Api } from "grammy";
 import prisma from "../db/prisma.js";
 import { formatWorkout } from "../handlers/client.js";
+import logger from "../lib/logger.js";
 
 const PT_ID = Number(process.env.PT_TELEGRAM_ID);
 const CLIENT_ID = Number(process.env.CLIENT_TELEGRAM_ID);
@@ -31,7 +32,7 @@ async function deliverWorkout(api: Api) {
   });
 
   if (!session) {
-    // No workout ready — notify PT
+    logger.warn("scheduler: no workout found for today, notifying PT");
     await api.sendMessage(
       PT_ID,
       "⚠️ Сьогодні тренувальний день, але тренування не збережено!\nДодай через /newworkout або /clone."
@@ -46,6 +47,11 @@ async function deliverWorkout(api: Api) {
     where: { id: session.id },
     data: { status: "DELIVERED", deliveredAt: new Date() },
   });
+
+  logger.info(
+    { sessionId: session.id, sessionNumber: session.sessionNumber },
+    `scheduler: workout #${session.sessionNumber} delivered to client`
+  );
 
   await api.sendMessage(
     PT_ID,
@@ -94,5 +100,5 @@ export function startScheduler(api: Api) {
     );
   });
 
-  console.log("Scheduler started: 7:30 delivery + 21:00 PT reminder");
+  logger.info("scheduler started: 7:30 delivery + 21:00 PT reminder");
 }

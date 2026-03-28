@@ -1,4 +1,5 @@
 import { Bot, Context, SessionFlavor, InlineKeyboard } from "grammy";
+import logger from "../lib/logger.js";
 import {
   type Conversation,
   type ConversationFlavor,
@@ -219,6 +220,11 @@ export async function newWorkoutConversation(
         weightKg: ex.weightKg ?? null,
       })),
     });
+
+    logger.info(
+      { sessionId: session.id, sessionNumber, exerciseCount: exercises.length, ptId: ctx.from?.id },
+      `workout created: session #${sessionNumber} with ${exercises.length} exercises`
+    );
   });
 
   await confirmCtx.editMessageText(
@@ -358,6 +364,11 @@ export async function cloneConversation(
         weightKg: ex.weightKg,
       })),
     });
+
+    logger.info(
+      { sessionId: newSession.id, sessionNumber, clonedFromSession: source.sessionNumber, ptId: ctx.from?.id },
+      `workout cloned: session #${source.sessionNumber} → #${sessionNumber}`
+    );
   });
 
   await cbCtx.editMessageText(
@@ -412,6 +423,11 @@ async function newPackageConversation(
         paymentStatus: "UNPAID",
       },
     })
+  );
+
+  logger.info(
+    { packageId: pkg.id, totalSessions: pkg.totalSessions, startDate, ptId: ctx.from?.id },
+    `package created: ${pkg.totalSessions} sessions starting ${startDate!.toLocaleDateString("uk-UA")}`
   );
 
   await ctx.reply(

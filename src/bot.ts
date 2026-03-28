@@ -1,6 +1,8 @@
 import { Bot, session } from "grammy";
 import { conversations } from "@grammyjs/conversations";
 import { knownUserOnly, isPT, isClient } from "./middleware/roleGuard.js";
+import { requestLogger } from "./middleware/logger.js";
+import logger from "./lib/logger.js";
 import { registerPTHandlers } from "./handlers/pt.js";
 import { registerClientHandlers } from "./handlers/client.js";
 import { startScheduler } from "./services/scheduler.js";
@@ -14,6 +16,7 @@ const bot = new Bot<MyContext>(token);
 // Middleware — session must come before conversations
 bot.use(session({ initial: () => ({}) }));
 bot.use(conversations());
+bot.use(requestLogger);
 bot.use(knownUserOnly);
 
 // /start
@@ -46,7 +49,7 @@ startScheduler(bot.api);
 
 // Start polling
 bot.start({
-  onStart: (info) => console.log(`@${info.username} is running`),
+  onStart: (info) => logger.info(`@${info.username} is running`),
 });
 
 // Graceful shutdown

@@ -2,6 +2,7 @@ import { Bot } from "grammy";
 import type { Session, Exercise } from "@prisma/client";
 import prisma from "../db/prisma.js";
 import { clientOnly } from "../middleware/roleGuard.js";
+import logger from "../lib/logger.js";
 import type { MyContext } from "./pt.js";
 
 const PT_ID = Number(process.env.PT_TELEGRAM_ID);
@@ -70,6 +71,11 @@ async function todayHandler(ctx: MyContext) {
       where: { id: session.id },
       data: { clientReadAt: new Date() },
     });
+
+    logger.info(
+      { sessionId: session.id, sessionNumber: session.sessionNumber, clientId: ctx.from?.id },
+      `client read receipt: session #${session.sessionNumber}`
+    );
 
     // Notify PT
     if (PT_ID) {
