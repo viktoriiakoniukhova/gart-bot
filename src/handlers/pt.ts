@@ -365,15 +365,73 @@ export async function cloneConversation(
   );
 }
 
+// ── /newpackage ───────────────────────────────────────────────────────────────
+
+async function newPackageConversation(
+  conversation: MyConversation,
+  ctx: MyContext
+) {
+  await ctx.reply("Скільки занять у пакеті? (наприклад: 12)");
+
+  let totalSessions: number | undefined;
+  while (!totalSessions) {
+    const msg = await conversation.waitFor("message:text");
+    const n = parseInt(msg.message.text.trim(), 10);
+    if (isNaN(n) || n <= 0) {
+      await msg.reply("Введи ціле число більше 0:");
+    } else {
+      totalSessions = n;
+    }
+  }
+
+  await ctx.reply("Дата початку пакету? (формат: ДД.ММ.РРРР, або /today для сьогодні)");
+
+  let startDate: Date | undefined;
+  while (!startDate) {
+    const msg = await conversation.waitFor("message:text");
+    const text = msg.message.text.trim();
+    if (text === "/today") {
+      startDate = new Date();
+      startDate.setHours(0, 0, 0, 0);
+    } else {
+      const [d, m, y] = text.split(".");
+      const parsed = new Date(`${y}-${m}-${d}`);
+      if (isNaN(parsed.getTime())) {
+        await msg.reply("Невірний формат. Спробуй ще раз (ДД.ММ.РРРР):");
+      } else {
+        startDate = parsed;
+      }
+    }
+  }
+
+  const pkg = await conversation.external(() =>
+    prisma.package.create({
+      data: {
+        totalSessions: totalSessions!,
+        startDate: startDate!,
+        paymentStatus: "UNPAID",
+      },
+    })
+  );
+
+  await ctx.reply(
+    `✅ Пакет створено!\n\nЗанять: ${pkg.totalSessions}\nПочаток: ${startDate!.toLocaleDateString("uk-UA")}\nОплата: не оплачено`
+  );
+}
+
 // ── register ──────────────────────────────────────────────────────────────────
 
 export function registerPTHandlers(bot: Bot<MyContext>) {
   bot.use(createConversation(newWorkoutConversation, "newworkout"));
   bot.use(createConversation(cloneConversation, "clone"));
+  bot.use(createConversation(newPackageConversation, "newpackage"));
 
   bot.command("newworkout", ptOnly, (ctx) =>
     ctx.conversation.enter("newworkout")
   );
   bot.command("history", ptOnly, historyHandler);
   bot.command("clone", ptOnly, (ctx) => ctx.conversation.enter("clone"));
+  bot.command("newpackage", ptOnly, (ctx) =>
+    ctx.conversation.enter("newpackage")
+  );
 }

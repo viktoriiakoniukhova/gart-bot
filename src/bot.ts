@@ -22,6 +22,7 @@ bot.command("start", async (ctx) => {
     await ctx.reply(
       "Привіт, тренер! 💪\n\n" +
         "Команди:\n" +
+        "/newpackage — створити пакет занять\n" +
         "/newworkout — створити тренування\n" +
         "/clone — клонувати минуле тренування\n" +
         "/history — список тренувань"
