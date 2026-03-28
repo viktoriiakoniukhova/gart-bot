@@ -1,4 +1,4 @@
-import { Bot, Context, InlineKeyboard } from "grammy";
+import { Bot, Context, SessionFlavor, InlineKeyboard } from "grammy";
 import {
   type Conversation,
   type ConversationFlavor,
@@ -9,7 +9,7 @@ import prisma from "../db/prisma.js";
 import { ptOnly } from "../middleware/roleGuard.js";
 import { formatWorkout } from "./client.js";
 
-export type MyContext = Context & ConversationFlavor;
+export type MyContext = Context & SessionFlavor<Record<string, never>> & ConversationFlavor;
 type MyConversation = Conversation<MyContext>;
 
 // ── /newworkout ──────────────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-import { Bot } from "grammy";
+import { Bot, session } from "grammy";
 import { conversations } from "@grammyjs/conversations";
 import { knownUserOnly, isPT, isClient } from "./middleware/roleGuard.js";
 import { registerPTHandlers } from "./handlers/pt.js";
@@ -11,7 +11,8 @@ if (!token) throw new Error("BOT_TOKEN is not set");
 
 const bot = new Bot<MyContext>(token);
 
-// Middleware
+// Middleware — session must come before conversations
+bot.use(session({ initial: () => ({}) }));
 bot.use(conversations());
 bot.use(knownUserOnly);
 
