@@ -44,6 +44,25 @@ bot.command("start", async (ctx) => {
 registerPTHandlers(bot);
 registerClientHandlers(bot);
 
+// Register bot commands in Telegram menu (scope per role)
+await bot.api.setMyCommands(
+  [
+    { command: "newpackage", description: "Створити пакет занять" },
+    { command: "newworkout", description: "Створити тренування" },
+    { command: "clone", description: "Клонувати минуле тренування" },
+    { command: "history", description: "Список тренувань" },
+  ],
+  { scope: { type: "chat", chat_id: Number(process.env.PT_TELEGRAM_ID) } }
+);
+
+await bot.api.setMyCommands(
+  [
+    { command: "today", description: "Переглянути сьогоднішнє тренування" },
+    { command: "session", description: "Прогрес пакету" },
+  ],
+  { scope: { type: "chat", chat_id: Number(process.env.CLIENT_TELEGRAM_ID) } }
+);
+
 // Start scheduler
 startScheduler(bot.api);
 
